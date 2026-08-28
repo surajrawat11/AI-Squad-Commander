@@ -99,6 +99,8 @@ class GameScene extends Phaser.Scene {
   }
   buildWorld() {
     this.add.rectangle(0, 0, WORLD, WORLD, 0x213a35).setOrigin(0).setDepth(-5);
+    for (let x = 0; x <= WORLD; x += 110) this.add.line(0, 0, x, 0, x, WORLD, 0x31534a, 0.18).setOrigin(0).setDepth(-4);
+    for (let y = 0; y <= WORLD; y += 110) this.add.line(0, 0, 0, y, WORLD, y, 0x31534a, 0.18).setOrigin(0).setDepth(-4);
     for (let x = 80; x < WORLD; x += 180) for (let y = 80; y < WORLD; y += 180) this.add.circle(x, y, 3, 0x5a8871, 0.25).setDepth(-4);
     [[360, 370, 450, 70], [990, 500, 70, 360], [1450, 420, 450, 70], [350, 1100, 350, 70], [1240, 1530, 70, 370], [1580, 1680, 340, 70]].forEach(([x, y, w, h]) => { const wall = this.add.rectangle(x, y, w, h, 0x293f43).setOrigin(0).setStrokeStyle(2, 0x3f6261).setDepth(0); this.walls.push({ x, y, width: w, height: h, display: wall }); });
     [[640, 740], [820, 720], [1480, 1100], [1750, 560], [530, 1590]].forEach(([x, y]) => { this.add.circle(x, y, 34, 0x8a9b62).setDepth(0); this.add.circle(x, y, 24, 0x58744e).setDepth(0); });
@@ -110,6 +112,7 @@ class GameScene extends Phaser.Scene {
   setupHUD() {
     this.hud = this.add.container(0, 0).setScrollFactor(0).setDepth(20); this.hud.add(this.add.rectangle(0, 0, W, 88, 0x071016, 0.94).setOrigin(0));
     this.hud.add(label(this, 30, 19, 'VIKENDI  //  SQUAD RAID', 19)); this.hud.add(label(this, 30, 51, `SYNC: ${this.sync.tier.toUpperCase()}  |  ${this.sync.aggressionLevel.toUpperCase()}  |  AIM ${Math.round(this.sync.aimAccuracy * 100)}%`, 12, '#63e6b5'));
+    this.phaseText = label(this, 650, 20, 'PHASE 01 // SCOUT', 13, '#f4c95d'); this.hud.add(this.phaseText); this.timerText = label(this, 650, 49, '00:00', 13, '#eaf4ff'); this.hud.add(this.timerText);
     this.aliveText = label(this, 870, 20, 'HOSTILES  3', 14, '#eaf4ff'); this.hud.add(this.aliveText); this.killText = label(this, 870, 49, 'KILLS  0', 13, '#f4c95d'); this.hud.add(this.killText);
     this.feed = label(this, 910, 106, '', 12, '#f4c95d').setWordWrapWidth(320); this.hud.add(this.feed);
     this.bubble = label(this, 450, 630, '', 14, '#071016').setBackgroundColor('#63e6b5').setPadding(12, 8).setWordWrapWidth(500); this.hud.add(this.bubble);
@@ -126,7 +129,7 @@ class GameScene extends Phaser.Scene {
     if (this.over) return; this.clock += delta;
     this.crosshair.setPosition(this.input.activePointer.x, this.input.activePointer.y);
     this.updateOperatorVisual(this.player, this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y));
-    this.movePlayer(delta); this.updateAI(delta); this.updateEnemies(delta); this.updateHUD();
+    this.movePlayer(delta); this.updateAI(delta); this.updateEnemies(delta); this.updateHUD(); this.timerText.setText(`${String(Math.floor(this.clock / 60000)).padStart(2, '0')}:${String(Math.floor(this.clock / 1000) % 60).padStart(2, '0')}`); this.phaseText.setText(this.clock > 26000 ? 'PHASE 03 // LAST CIRCLE' : this.clock > 12000 ? 'PHASE 02 // ROTATE' : 'PHASE 01 // SCOUT');
     if (this.clock > 9000 && !this.downed && !this.revived) this.downPlayer();
     if (this.downed && !this.revived && this.clock > 12500) this.revivePlayer();
     if (this.clock > 26000 && this.enemies.some((enemy) => enemy.active)) this.say('zone_warning');
