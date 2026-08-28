@@ -52,7 +52,7 @@ class BriefingScene extends Phaser.Scene {
     this.profile = data.profile; this.sync = buildSkillSync(this.profile);
     this.cameras.main.setBackgroundColor('#0e1b2a');
     this.add.text(54, 54, 'AI COMMANDER // INTEL BRIEFING', { ...font, fontSize: '24px', color: '#eaf4ff' });
-    this.add.text(54, 105, `${this.profile.name.toUpperCase()} SYNC | SCORE ${this.sync.score} | ${this.sync.aggression.toUpperCase()} POSTURE`, { ...font, fontSize: '13px', color: '#70e6c1' });
+    this.add.text(54, 105, `${this.profile.name.toUpperCase()} SYNC | SCORE ${this.sync.score} | ${this.sync.aggressionLevel.toUpperCase()} POSTURE`, { ...font, fontSize: '13px', color: '#70e6c1' });
     this.add.rectangle(54, 160, 790, 230, 0x122336).setOrigin(0, 0);
     this.add.text(84, 192, 'COMMANDER', { ...font, fontSize: '14px', color: '#70e6c1' });
     this.brief = this.add.text(84, 240, 'COMMANDER is consulting field intel...', { ...font, fontSize: '20px', color: '#eaf4ff', wordWrap: { width: 690 } });
@@ -68,9 +68,10 @@ class GameScene extends Phaser.Scene {
     super('GameScene');
   }
 
-  create() {
+  create(data) {
     this.cameras.main.setBackgroundColor('#0e1b2a');
     this.profile = data.profile; this.sync = data.sync; this.elapsed = 0; this.downed = false; this.revived = false;
+    this.matchOver = false;
     this.cameras.main.setBackgroundColor('#0e1b2a');
     this.add.rectangle(40, 94, 820, 466, 0x14283a).setOrigin(0, 0);
     [[170, 170, 230, 24], [475, 235, 24, 190], [240, 420, 250, 24], [650, 150, 130, 24]].forEach(([x, y, w, h]) => this.add.rectangle(x, y, w, h, 0x29495c).setOrigin(0, 0));
@@ -80,7 +81,8 @@ class GameScene extends Phaser.Scene {
     this.callout('enemy_spotted');
   }
 
-  update() {
+  update(_time, delta) {
+    if (this.matchOver) return;
     const speed = 3.2;
     this.elapsed += delta;
     if (!this.downed) {
@@ -97,11 +99,12 @@ class GameScene extends Phaser.Scene {
   }
   callout(eventType, state = {}) { this.hud.thinking(); this.hud.addFeed('> AI thinking...'); requestCallout(eventType, this.sync.tier, state).then((line) => { this.hud.say(line); this.hud.addFeed(`> ${line}`); }); }
   playerShoot() { const target = this.enemies.find((enemy) => enemy.active); if (!target) return; this.player.lastShot = this.elapsed; fireAt(this, this.player, target, 18, 0x8bc8ff); this.finishEnemy(target); }
-  updateTeammate(delta) { if (this.downed) moveToward(this.teammate, this.player, 2.3, delta); else moveToward(this.teammate, { x: this.player.x - this.sync.followDistance, y: this.player.y }, this.sync.aggression === 'aggressive' ? 3.4 : 2.2, delta); const target = this.enemies.find((enemy) => enemy.active); if (target && this.elapsed - this.teammate.lastShot > this.sync.reactionDelay) { this.teammate.lastShot = this.elapsed; if (Math.random() < this.sync.aimAccuracy) { fireAt(this, this.teammate, target, 22, 0x70e6c1); this.finishEnemy(target); } } }
-  updateEnemies(delta) { this.enemies.forEach((enemy) => { if (!enemy.active) return; const target = this.downed ? this.teammate : this.player; if (distance(enemy, target) < 390) { moveToward(enemy, target, 0.55, delta); if (this.elapsed - enemy.lastShot > 1400) { enemy.lastShot = this.elapsed; if (!this.downed) { this.player.hp -= 9; if (this.player.hp <= 0) this.downPlayer(); } else this.teammate.hp -= 5; } } }); }
-  finishEnemy(enemy) { if (enemy.hp <= 0) { enemy.setActive(false).setVisible(false); this.callout('enemy_killed'); } }
-  downPlayer() { if (this.downed) return; this.downed = true; this.player.hp = 1; this.player.setFillStyle(0x6f8ca8); this.callout('player_downed'); }
-  revivePlayer() { this.revived = true; this.downed = false; this.player.hp = 70; this.player.setFillStyle(0x55aaff); this.hud.addFeed('> REVIVE COMPLETE // CLUTCH'); this.callout('enemy_spotted', { direction: 'right', distance: 'close' }); }
+  updateTeammate(delta) { if (this.downed) moveToward(this.teammate, this.player, 2.3, delta); else moveToward(this.teammate, { x: this.player.x - this.sync.followDistance, y: this.player.y }, this.sync.aggressionLevel === 'aggressive' ? 3.4 : 2.2, delta); const target = this.enemies.find((enemy) => enemy.active); if (target && this.elapsed - this.teammate.lastShot > this.sync.reactionDelayMs) { this.teammate.lastShot = this.elapsed; if (Math.random() < this.sync.aimAccuracy) { fireAt(this, this.teammate, target, 22, 0x70e6c1); this.finishEnemy(target); } } }
+  updateEnemies(delta) { this.enemies.forEach((enemy) => { if (!enemy.active) return; const target = this.downed ? this.teammate : this.player; if (distance(enemy, target) < 390) { moveToward(enemy, target, 0.55, delta); if (this.elapsed - enemy.lastShot > 1400) { enemy.lastShot = this.elapsed; if (!this.downed) { this.player.hp -= 9; if (this.player.hp <= 0) this.downPlayer(); } else { this.teammate.hp -= 5; if (this.teammate.hp <= 0) this.endMatch(false); } } } }); }
+  finishEnemy(enemy) { if (enemy.hp <= 0) { enemy.setActive(false).setVisible(false); this.callout('enemy_killed'); if (this.revived && this.enemies.every((item) => !item.active)) this.endMatch(true); } }
+  downPlayer() { if (this.downed || this.revived) return; this.downed = true; this.player.hp = 1; this.player.setFillStyle(0x6f8ca8); this.callout('player_downed'); }
+  revivePlayer() { if (!this.downed || this.revived) return; this.revived = true; this.downed = false; this.player.hp = 70; this.player.setFillStyle(0x55aaff); this.hud.addFeed('> REVIVE COMPLETE // CLUTCH'); this.callout('enemy_spotted', { direction: 'right', distance: 'close' }); }
+  endMatch(won) { if (this.matchOver) return; this.matchOver = true; this.physics?.pause(); const title = won ? 'SECTOR CLEARED' : 'SQUAD LOST'; const color = won ? '#70e6c1' : '#ed7777'; this.add.rectangle(170, 190, 560, 220, 0x09121e, 0.96).setDepth(20); this.add.text(250, 230, title, { ...font, fontSize: '30px', color }).setDepth(21); this.add.text(254, 280, won ? 'Revive confirmed. All raiders eliminated.' : 'Commander went down. Try another profile.', { ...font, fontSize: '13px', color: '#eaf4ff' }).setDepth(21); const button = this.add.rectangle(320, 330, 260, 48, 0x1c8c73).setInteractive({ useHandCursor: true }).setDepth(21); this.add.text(370, 346, 'RESTART RAID', { ...font, fontSize: '14px', color: '#fff' }).setDepth(22); button.on('pointerdown', () => this.scene.start('SkillSelectScene')); }
 }
 
 new Phaser.Game({

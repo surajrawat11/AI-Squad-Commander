@@ -36,14 +36,14 @@ Choose Beginner, read the Intel Briefing, and deploy. Move with `WASD` or arrow 
 
 ## Skill Sync
 
-`server/services/skillSync.js` is the centerpiece. It normalizes five mock raid statistics into one composite score: K/D 30%, average damage 20%, accuracy 20%, survival time 20%, and revive count 10%. The score maps to Beginner, Intermediate, or Pro. Each tier returns combat settings (aim accuracy, reaction delay, follow distance, aggression) and a tier-specific Groq system prompt.
+`server/services/skillSync.js` is the centerpiece. It normalizes five mock raid statistics into one composite score: K/D 30%, average damage 20%, accuracy 20%, survival time 20%, and revive count 10%. The score maps to Beginner, Intermediate, or Pro. Each tier returns `{ aimAccuracy, reactionDelayMs, aggressionLevel, calloutComplexity }`, a follow distance, and a tier-specific Groq system prompt.
 
 This makes the contrast explainable in under a minute: the same teammate abstraction receives a different configuration, so both its decisions and voice adapt to the selected player history.
 
 ## Groq And Tavily
 
-- Groq powers short in-combat callouts through `POST /api/callout`. Requests cap output at 30 tokens and use a 2.6-second server timeout. The HUD shows `COMMANDER is thinking...` while the request is pending, then logs the returned line.
-- Tavily powers one pre-match search through `GET /api/briefing?tier=...`, searching generic cover and rotation strategy concepts. The result is cached per tier and rewritten by Groq before the game displays it; raw search text is never shown. It has the same timeout and a hardcoded tier fallback.
+- Groq powers short in-combat callouts through `POST /api/callout`. Requests cap output at 30 tokens and use a hard 2.5-second server timeout. The HUD shows `COMMANDER is thinking...` while the request is pending, then logs the returned line.
+- Tavily powers one pre-match search through `GET /api/briefing?tier=...`, searching generic cover and rotation strategy concepts. The result is cached per tier and rewritten by Groq before the game displays it; raw search text is never shown. It has the same 2.5-second timeout and a hardcoded tier fallback.
 - Missing keys, API errors, timeouts, or `OFFLINE_MODE=true` all return local fallback lines. Combat never waits on Tavily.
 
 ## Project Map

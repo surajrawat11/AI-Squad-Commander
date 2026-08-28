@@ -1,7 +1,7 @@
 import fallbackCallouts from '../data/fallbackCallouts.json' with { type: 'json' };
 import { tierPrompts } from './skillSync.js';
 
-const timeoutFetch = (url, options, timeoutMs = 2600) => Promise.race([
+const timeoutFetch = (url, options, timeoutMs = 2500) => Promise.race([
   fetch(url, options),
   new Promise((_, reject) => setTimeout(() => reject(new Error('Groq timeout')), timeoutMs)),
 ]);

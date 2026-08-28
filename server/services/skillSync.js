@@ -16,9 +16,9 @@ export function buildSkillSync(profile) {
   ));
   const tier = score < 40 ? 'beginner' : score < 70 ? 'intermediate' : 'pro';
   const configs = {
-    beginner: { aimAccuracy: 0.48, reactionDelay: 720, aggression: 'passive', followDistance: 100 },
-    intermediate: { aimAccuracy: 0.68, reactionDelay: 460, aggression: 'balanced', followDistance: 82 },
-    pro: { aimAccuracy: 0.86, reactionDelay: 240, aggression: 'aggressive', followDistance: 62 },
+    beginner: { aimAccuracy: 0.48, reactionDelayMs: 720, aggressionLevel: 'passive', calloutComplexity: 'simple', followDistance: 100 },
+    intermediate: { aimAccuracy: 0.68, reactionDelayMs: 460, aggressionLevel: 'balanced', calloutComplexity: 'tactical', followDistance: 82 },
+    pro: { aimAccuracy: 0.86, reactionDelayMs: 240, aggressionLevel: 'aggressive', calloutComplexity: 'advanced', followDistance: 62 },
   };
   return { score, tier, ...configs[tier], systemPrompt: tierPrompts[tier] };
 }
