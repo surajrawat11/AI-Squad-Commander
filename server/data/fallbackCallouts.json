@@ -1,0 +1,23 @@
+{
+  "beginner": {
+    "enemy_spotted": "Enemy ahead. Stay close to me.",
+    "teammate_low_hp": "I am hurt. Take cover.",
+    "player_downed": "Stay calm. I am reviving you.",
+    "enemy_killed": "Good job. Area is clear.",
+    "zone_warning": "Move with me. Safe cover this way."
+  },
+  "intermediate": {
+    "enemy_spotted": "Contact ahead. Hold cover and watch your angle.",
+    "teammate_low_hp": "I am tagged. Resetting behind cover.",
+    "player_downed": "You are down. Covering the revive now.",
+    "enemy_killed": "Target down. Sweep the next angle.",
+    "zone_warning": "Rotate now. We have a clean route."
+  },
+  "pro": {
+    "enemy_spotted": "Contact front. Anchor this angle; I will wide-swing.",
+    "teammate_low_hp": "Armor cracked. Breaking LOS, then re-peeking.",
+    "player_downed": "You are down. Smoke-side revive, hold the crossfire.",
+    "enemy_killed": "One down. Clear the flank and reset utility.",
+    "zone_warning": "Zone closing. Rotate early through the hard cover."
+  }
+}

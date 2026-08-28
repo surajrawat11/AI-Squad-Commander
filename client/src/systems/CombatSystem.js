@@ -1,0 +1,3 @@
+export function distance(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+export function moveToward(actor, target, speed, delta) { const angle = Math.atan2(target.y - actor.y, target.x - actor.x); actor.x += Math.cos(angle) * speed * delta / 16; actor.y += Math.sin(angle) * speed * delta / 16; }
+export function fireAt(scene, source, target, damage, color = 0xffe082) { const shot = scene.add.line(0, 0, source.x, source.y, target.x, target.y, color).setLineWidth(2).setDepth(1); scene.time.delayedCall(90, () => shot.destroy()); target.hp -= damage; }

@@ -1,0 +1,5 @@
+[
+  { "id": "beginner", "name": "Beginner", "kd_ratio": 0.7, "avg_damage": 112, "accuracy": 24, "survival_time": 540, "revive_count": 0, "description": "Learning the rhythm of the raid" },
+  { "id": "intermediate", "name": "Intermediate", "kd_ratio": 1.8, "avg_damage": 286, "accuracy": 42, "survival_time": 1020, "revive_count": 1, "description": "Reliable under pressure" },
+  { "id": "pro", "name": "Pro", "kd_ratio": 3.4, "avg_damage": 520, "accuracy": 68, "survival_time": 1680, "revive_count": 3, "description": "Reads the whole battlefield" }
+]
