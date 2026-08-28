@@ -69,7 +69,7 @@ class BriefingScene extends Phaser.Scene {
 class GameScene extends Phaser.Scene {
   constructor() { super('GameScene'); }
   create(data) {
-    this.sync = data.sync; this.clock = 0; this.downed = false; this.revived = false; this.over = false; this.kills = 0; this.nextCallout = 0;
+    this.sync = data.sync; this.clock = 0; this.downed = false; this.revived = false; this.over = false; this.kills = 0; this.nextCallout = 0; this.mapDots = [];
     this.walls = [];
     this.cameras.main.setBackgroundColor('#182b2c');
     this.buildWorld();
@@ -97,6 +97,11 @@ class GameScene extends Phaser.Scene {
     this.feed = label(this, 910, 106, '', 12, '#f4c95d').setWordWrapWidth(320); this.hud.add(this.feed);
     this.bubble = label(this, 450, 630, '', 14, '#071016').setBackgroundColor('#63e6b5').setPadding(12, 8).setWordWrapWidth(500); this.hud.add(this.bubble);
     this.hud.add(label(this, 30, 674, 'WASD / ARROWS MOVE     AIM + CLICK / SPACE FIRE', 12, '#91afba'));
+    this.hud.add(this.add.rectangle(1080, 104, 170, 112, 0x071016, 0.88).setOrigin(0).setStrokeStyle(2, 0x52737a));
+    this.hud.add(label(this, 1092, 110, 'TACTICAL MAP', 10, '#f4c95d'));
+    this.mapDots.push({ object: this.add.circle(0, 0, 4, 0x54a8ff).setScrollFactor(0).setDepth(22), unit: this.player });
+    this.mapDots.push({ object: this.add.circle(0, 0, 4, 0x63e6b5).setScrollFactor(0).setDepth(22), unit: this.ai });
+    this.enemies.forEach((enemy) => this.mapDots.push({ object: this.add.circle(0, 0, 4, 0xe45d5d).setScrollFactor(0).setDepth(22), unit: enemy }));
     this.playerBar = this.add.rectangle(210, 658, 190, 12, 0x54a8ff).setOrigin(0).setScrollFactor(0).setDepth(21); this.aiBar = this.add.rectangle(570, 658, 190, 12, 0x63e6b5).setOrigin(0).setScrollFactor(0).setDepth(21); this.hud.add(label(this, 120, 657, 'YOU', 12, '#8bc8ff')); this.hud.add(label(this, 485, 657, 'AI', 12, '#63e6b5'));
   }
   say(eventType) { this.bubble.setText('COMMANDER ...'); this.feed.setText(`> AI thinking...\n${this.feed.text}`.split('\n').slice(0, 6).join('\n')); requestCallout(eventType, this.sync.tier).then((line) => { if (!this.over) { this.bubble.setText(line); this.feed.setText(`> ${line}\n${this.feed.text}`.split('\n').slice(0, 6).join('\n')); } }); }
@@ -119,7 +124,7 @@ class GameScene extends Phaser.Scene {
   hitEnemy(enemy, damage, source) { const tracer = this.add.line(0, 0, source.x, source.y, enemy.x, enemy.y, source === this.player ? 0xf4c95d : 0x63e6b5).setLineWidth(3).setDepth(3); this.tweens.add({ targets: tracer, alpha: 0, duration: 180, onComplete: () => tracer.destroy() }); enemy.hp -= damage; if (enemy.hp <= 0) { enemy.setActive(false).setVisible(false); enemy.nameTag.setVisible(false); enemy.hpBar.setVisible(false); this.kills++; this.killText.setText(`KILLS  ${this.kills}`); this.say('enemy_killed'); if (!this.enemies.some((item) => item.active) && this.revived) this.finish(true); } }
   downPlayer() { this.downed = true; this.player.hp = 1; this.player.setFillStyle(0x8799a3); this.say('player_downed'); }
   revivePlayer() { this.revived = true; this.downed = false; this.player.hp = 70; this.player.setFillStyle(0x54a8ff); this.feed.setText('> REVIVE COMPLETE // CLUTCH\n' + this.feed.text); this.say('enemy_spotted'); }
-  updateHUD() { this.playerBar.width = 190 * Math.max(this.player.hp, 0) / 100; this.aiBar.width = 190 * Math.max(this.ai.hp, 0) / 100; }
+  updateHUD() { this.playerBar.width = 190 * Math.max(this.player.hp, 0) / 100; this.aiBar.width = 190 * Math.max(this.ai.hp, 0) / 100; const mapLeft = 1080; const mapTop = 126; this.mapDots.forEach(({ object, unit }) => { object.setPosition(mapLeft + unit.x / WORLD * 150, mapTop + unit.y / WORLD * 82); object.setVisible(unit.active !== false); }); if (this.zone) this.zone.setRadius(Math.max(420, 920 - Math.max(0, this.clock - 12000) * 0.012)); }
   finish(won) { this.over = true; this.add.rectangle(300, 220, 680, 250, 0x071016, 0.97).setScrollFactor(0).setDepth(30); label(this, 485, 270, won ? 'SQUAD WIN' : 'SQUAD LOST', 38, won ? '#63e6b5' : '#e45d5d').setScrollFactor(0).setDepth(31); label(this, 440, 330, won ? 'All hostiles cleared after the clutch revive.' : 'The squad was eliminated.', 14).setScrollFactor(0).setDepth(31); const button = this.add.rectangle(500, 380, 260, 48, 0x20a47e).setScrollFactor(0).setDepth(31).setInteractive({ useHandCursor: true }); label(this, 548, 396, 'RUN IT BACK', 14).setScrollFactor(0).setDepth(32); button.on('pointerdown', () => this.scene.start('ProfileScene')); }
 }
 
