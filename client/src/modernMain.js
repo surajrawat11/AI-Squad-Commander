@@ -19,6 +19,12 @@ class LobbyScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor('#081018');
     this.add.rectangle(0, 0, W, H, 0x081018).setOrigin(0);
     this.add.rectangle(760, 0, 520, H, 0x102c35).setOrigin(0).setAlpha(0.8);
+    label(this, 820, 82, 'VIKENDI / DROP SECTOR 04', 13, '#f4c95d');
+    this.add.circle(1015, 350, 210, 0x193f3d, 0.9).setStrokeStyle(2, 0x63e6b5, 0.55);
+    this.add.circle(1015, 350, 145, 0x22534c, 0.8).setStrokeStyle(1, 0x63e6b5, 0.35);
+    [[900, 270, 70, 20], [1030, 405, 110, 20], [1100, 240, 54, 20], [905, 430, 45, 20]].forEach(([x, y, width, height]) => this.add.rectangle(x, y, width, height, 0x32665c, 0.8).setOrigin(0).setRotation(-0.12));
+    [[958, 320, 0x54a8ff], [990, 352, 0x63e6b5], [1068, 300, 0xe45d5d]].forEach(([x, y, color]) => this.add.circle(x, y, 8, color).setStrokeStyle(2, 0xf4f7e8, 0.8));
+    label(this, 820, 600, 'SQUAD INTELLIGENCE // ONLINE', 12, '#63e6b5');
     label(this, 74, 62, 'AI SQUAD', 64); label(this, 78, 132, 'COMMANDER', 64, '#63e6b5');
     label(this, 82, 230, 'DROP INTO THE LAST CIRCLE', 18, '#91afba');
     label(this, 82, 270, 'Your squadmate adapts to your raid history.', 15, '#66818d');
