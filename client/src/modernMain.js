@@ -123,4 +123,4 @@ class GameScene extends Phaser.Scene {
   finish(won) { this.over = true; this.add.rectangle(300, 220, 680, 250, 0x071016, 0.97).setScrollFactor(0).setDepth(30); label(this, 485, 270, won ? 'SQUAD WIN' : 'SQUAD LOST', 38, won ? '#63e6b5' : '#e45d5d').setScrollFactor(0).setDepth(31); label(this, 440, 330, won ? 'All hostiles cleared after the clutch revive.' : 'The squad was eliminated.', 14).setScrollFactor(0).setDepth(31); const button = this.add.rectangle(500, 380, 260, 48, 0x20a47e).setScrollFactor(0).setDepth(31).setInteractive({ useHandCursor: true }); label(this, 548, 396, 'RUN IT BACK', 14).setScrollFactor(0).setDepth(32); button.on('pointerdown', () => this.scene.start('ProfileScene')); }
 }
 
-new Phaser.Game({ type: Phaser.AUTO, parent: 'game', width: W, height: H, backgroundColor: '#081018', scene: [LobbyScene, ProfileScene, BriefingScene, GameScene] });
+new Phaser.Game({ type: Phaser.AUTO, parent: 'game', backgroundColor: '#081018', scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH, width: W, height: H }, scene: [LobbyScene, ProfileScene, BriefingScene, GameScene] });
